@@ -13,16 +13,14 @@ def register(request):
     if request.method == 'POST':
         form = SignUpForm(request.POST)
         if form.is_valid():
-            user = form.save(commit=False)
-            user.email = form.cleaned_data.get('email')
+            user = form.save()
+            user.refresh_from_db()  # Load the profile instance created by the signal
+            user.profile.email = form.cleaned_data.get('email')
             user.save()
-            address = form.cleaned_data.get('address')
-            user.profile.address = address
-            user.profile.save()
             raw_password = form.cleaned_data.get('password1')
             user = authenticate(username=user.username, password=raw_password)
             login(request, user)
-            return redirect('home')
+            return redirect('index')
     else:
         form = SignUpForm()
     
